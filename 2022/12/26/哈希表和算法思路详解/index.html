@@ -6,17 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://hggzhang.github.io">
-  <title>categories | 失落的时空图书馆</title>
+  <title>哈希表和算法思路详解 | 失落的时空图书馆</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="https://hggzhang.github.io/categories/index.html">
+  <meta name="description" content="概述 哈希表是一种可以满足快速查找数据结构，时间复杂度接近O(1)。 哈希函数是无限集到有限集的映射。 处理数据量大，查找效率要求高时推荐使用hash容器。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="哈希表和算法思路详解">
+<meta property="og:url" content="https://hggzhang.github.io/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/index.html">
 <meta property="og:site_name" content="失落的时空图书馆">
+<meta property="og:description" content="概述 哈希表是一种可以满足快速查找数据结构，时间复杂度接近O(1)。 哈希函数是无限集到有限集的映射。 处理数据量大，查找效率要求高时推荐使用hash容器。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-12-18T04:30:28.000Z">
-<meta property="article:modified_time" content="2022-12-18T04:36:46.323Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/6395e1b15a38a3f366c13893f6830b09.jpeg">
+<meta property="article:published_time" content="2022-12-26T04:13:16.000Z">
+<meta property="article:modified_time" content="2022-12-26T08:12:06.596Z">
 <meta property="article:author" content="寡人正在Coding">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/6395e1b15a38a3f366c13893f6830b09.jpeg">
   
     <link rel="alternative" href="/atom.xml" title="失落的时空图书馆" type="application/atom+xml">
   
@@ -130,27 +135,145 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="categories-" class="article article-type-categories " itemscope itemprop="blogPost">
+            <article id="hash-哈希表和算法思路详解" class="article article-type-hash " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      categories
+      哈希表和算法思路详解
     </h1>
   
 
         
-        <a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2022-12-18T04:30:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-18</time>
+        <a href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:13:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
+<li>哈希表是一种可以满足快速查找数据结构，时间复杂度接近O(1)。</li>
+<li>哈希函数是无限集到有限集的映射。</li>
+<li>处理数据量大，查找效率要求高时推荐使用hash容器。<span id="more"></span></li>
+<li>问题：<ul>
+<li>什么情况下考虑使用哈希容器？</li>
+<li>常用的哈希思路有哪些？</li>
+<li>评判哈希算法标准有哪些？</li>
+<li>哈希冲突是如何产生的？如何解决？</li>
+<li>如何构造一个hash算法？应注意哪些问题？</li>
+</ul>
+</li>
+</ul>
+<h1 id="评判哈希算法标准"><a href="#评判哈希算法标准" class="headerlink" title="评判哈希算法标准"></a>评判哈希算法标准</h1><ul>
+<li>效率高。</li>
+<li>映射分布均匀。</li>
+</ul>
+<h1 id="基础hash思路"><a href="#基础hash思路" class="headerlink" title="基础hash思路"></a>基础hash思路</h1><h2 id="直接寻址法："><a href="#直接寻址法：" class="headerlink" title="直接寻址法："></a>直接寻址法：</h2><p>取关键字key,使用线性函数 Hash(key) &#x3D; a * key + b。</p>
+<h2 id="数字分析法："><a href="#数字分析法：" class="headerlink" title="数字分析法："></a>数字分析法：</h2><p>在一个班级里，同龄学生很多。在取学生年龄作为key时，应避免以年份作为key组成部分。</p>
+<h2 id="平方取中法："><a href="#平方取中法：" class="headerlink" title="平方取中法："></a>平方取中法：</h2><p>key取平方，截取中间的几位作为新的key。数学计算的性质乘积中间几位和乘数每一位都有关，充分混合key每一位对生成的哈希值的影响，使映射分布更均匀。</p>
+<h2 id="取余法："><a href="#取余法：" class="headerlink" title="取余法："></a>取余法：</h2><p>Hash(key) &#x3D; key % m</p>
+<h2 id="相乘取整法"><a href="#相乘取整法" class="headerlink" title="相乘取整法:"></a>相乘取整法:</h2><p>Hash(key) &#x3D; floor(frac(key * A), m), 0&lt;A&lt;1</p>
+<ul>
+<li>floor 取整，frac 取小数</li>
+<li>此法避免像除余法中结果对m过于依赖。</li>
+</ul>
+<h2 id="随机数法"><a href="#随机数法" class="headerlink" title="随机数法"></a>随机数法</h2><p>Hash(key) &#x3D; rand(key)</p>
+<ul>
+<li>据我所知C#的object采用此方法，使用元数据中的几位存hash值。</li>
+</ul>
+<h2 id="折叠法："><a href="#折叠法：" class="headerlink" title="折叠法："></a>折叠法：</h2><p>将关键字按固定长度分成几段然后相加。</p>
+<ul>
+<li>如：Hash(1234,m &#x3D; 2) &#x3D; 46。</li>
+<li>关键字较长时可以考虑使用此方法。</li>
+</ul>
+<h1 id="哈希冲突"><a href="#哈希冲突" class="headerlink" title="哈希冲突"></a>哈希冲突</h1><h2 id="产生原因"><a href="#产生原因" class="headerlink" title="产生原因"></a>产生原因</h2><p>由于哈希函数是无限集到有限集的映射，换而言之，有限集的元素对应n个无限集的元素，哈希碰撞是不可避免的。</p>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><h3 id="开放地址法"><a href="#开放地址法" class="headerlink" title="开放地址法"></a>开放地址法</h3><p>当关键字key的哈希地址p&#x3D;H（key）出现冲突时,递归调用p &#x3D; Hi(p)直到没有冲突。</p>
+<blockquote>
+<p>Hi&#x3D;（H（key）+di)Hi&#x3D;（H（key）+di) % m   i&#x3D;1,2,,3….,ni&#x3D;1,2,,3….,n</p>
+</blockquote>
+<ul>
+<li>H(key) 为哈希函数</li>
+<li>m 为表长</li>
+<li>di 为增量序列</li>
+</ul>
+<hr>
+<p>根据增量序列di的不同，又分为：</p>
+<ul>
+<li>线性探测：di &#x3D; 1,2,3,……</li>
+<li>二次探测: di &#x3D; ±1^2， ±2^2，…….</li>
+<li>随机探测: di &#x3D; random(di，seed)<ul>
+<li>random 为 无状态的伪随机发生函数（所谓无状态，即无论多少次调用，random(a) &#x3D; b不变）</li>
+<li>seed 一个确定不变的随机数种子</li>
+</ul>
+</li>
+</ul>
+<h3 id="链式地址法"><a href="#链式地址法" class="headerlink" title="链式地址法"></a>链式地址法</h3><blockquote>
+<p>结构示意<br>  pos1<br>  pos2 -&gt; val -&gt; val<br>  pos3 -&gt; val<br>  pos4<br>  …</p>
+</blockquote>
+<p>无限集映射到有限集，有限集的每个元素对应一个链表，链表存储无限集映射到有限集的n个元素。</p>
+<h3 id="再哈希法"><a href="#再哈希法" class="headerlink" title="再哈希法"></a>再哈希法</h3><blockquote>
+<p>Hi&#x3D;RHi（key）i&#x3D;1，2，…，k</p>
+</blockquote>
+<p>递归调用哈希函数序列中的函数，直到没有冲突。</p>
+<h3 id="建立公共溢出区法"><a href="#建立公共溢出区法" class="headerlink" title="建立公共溢出区法"></a>建立公共溢出区法</h3><p>建立溢出链表，如发生哈希碰撞，则使用溢出链表。</p>
+<h2 id="哈希冲突解决方法优缺点分析"><a href="#哈希冲突解决方法优缺点分析" class="headerlink" title="哈希冲突解决方法优缺点分析"></a>哈希冲突解决方法优缺点分析</h2><h3 id="开放散列：链式地址法（桶链法）"><a href="#开放散列：链式地址法（桶链法）" class="headerlink" title="开放散列：链式地址法（桶链法）"></a>开放散列：链式地址法（桶链法）</h3><ul>
+<li>优点:<ul>
+<li>添加删除方便，避免动态调整开销</li>
+<li>桶链表内存动态分配，减少内存浪费</li>
+<li>当哈希表size很大时，指针的性能消耗可以忽略</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>动态分配内存，内存不紧凑，随机访问性差，序列化性能差。</li>
+<li>对于预先知道所有元素，可以实现没有冲突的完美hash函数，此时效率会远低于封闭散列。</li>
+</ul>
+</li>
+</ul>
+<h3 id="封闭散列：开放地址法，再哈希法-…"><a href="#封闭散列：开放地址法，再哈希法-…" class="headerlink" title="封闭散列：开放地址法，再哈希法 …"></a>封闭散列：开放地址法，再哈希法 …</h3><ul>
+<li>优点：<ul>
+<li>内存紧凑，随机访问性能好，序列化性能好。</li>
+<li>预先知道所有元素e，可以实现完美hash函数，此时效率远高于开放散列。</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>所有条目数量不能超过数组的长度，扩容&#x2F;收紧频繁，性能消耗大。</li>
+<li>碰撞探测消耗性能。</li>
+<li>当数组长度很大时，有内存浪费。</li>
+</ul>
+</li>
+</ul>
+<h1 id="哈希算法进阶实例分析"><a href="#哈希算法进阶实例分析" class="headerlink" title="哈希算法进阶实例分析"></a>哈希算法进阶实例分析</h1><p>这是取自lua5.4的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-- lua 5.4</span><br><span class="line"></span><br><span class="line">unsigned int luaS_hash (const char *str, size_t l, unsigned int seed,</span><br><span class="line">                        size_t step) &#123;</span><br><span class="line">  unsigned int h = seed ^ cast_uint(l);</span><br><span class="line">  for (; l &gt;= step; l -= step)</span><br><span class="line">    h ^= ((h&lt;&lt;5) + (h&gt;&gt;2) + cast_byte(str[l - 1]));</span><br><span class="line">  return h;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#define lmod(s,size) \</span><br><span class="line">	(check_exp((size&amp;(size-1))==0, (cast_int((s) &amp; ((size)-1)))))</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>(h &lt;&lt; 5) + (h &gt;&gt; 2)<br>&#x3D; (((h &lt;&lt; 5) &lt;&lt; 2) + ((h &gt;&gt; 2) &lt;&lt; 2) &gt;&gt; 2)<br>&#x3D; ((h &lt;&lt; 7) + h) &gt;&gt; 2<br>&#x3D; (129 * h) &gt;&gt; 2</p>
+</blockquote>
+<ul>
+<li><p>和伪随机数生成算法一样，要让生成的数尽量随机–二进制数的每一个位取0或1的概率都是50%。</p>
+</li>
+<li><p>移位，异或运算充分混合每一位的影响，而加法运算引起多个位的反转，使hash值的每一个位更加不可预测，以接近不可逆的单向函数。</p>
+</li>
+<li><p>(h &lt;&lt; 5) + (h &gt;&gt; 2) &#x3D; (129 * h) &gt;&gt; 2。 乘法可以被拆分为加法和移位的组合（即（h &lt;&lt; 7）+h ），以混合哈希值。不过(h &lt;&lt; 7 - h) &#x3D; 127h 会更好些，127是梅森素数（2^n -1）。与线性同余算法（LCG）生成伪随机数一样，梅森素数127，只需一次移位运算和一次加法运算，且不会被分解，随机数分布更加均匀。<br><img src="https://img-blog.csdnimg.cn/img_convert/6395e1b15a38a3f366c13893f6830b09.jpeg" alt="image"></p>
+<ul>
+<li>非素数会被分解成更小的素数的乘积，参与运算时容易被分解,上例中a和c可以提取公因数d，模 &#x3D; n &#x3D; c&#x2F;d。</li>
+</ul>
+</li>
+<li><p>a%b &#x3D; a&amp;(b-1) 当 b &#x3D; 2^n 时等式成立，lua哈希表的长度保证符合等式成立的条件，lmod使用位运算代替取余运算，效率更高。</p>
+</li>
+<li><p>算法实际应用详情请参考我的文章 </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hggzhang/p/16426355.html" title="Lua5.4源码剖析：二. 详解String数据结构及操作算法 ">跳转链接： Lua5.4源码剖析：二. 详解String数据结构及操作算法 </a></li>
+</ul>
+</li>
+</ul>
+<h1 id="进阶哈希算法"><a href="#进阶哈希算法" class="headerlink" title="进阶哈希算法"></a>进阶哈希算法</h1><p>下面是一些进阶哈希算法的思路，需要花费一些时间学习。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.burtleburtle.net/bob/hash/doobs.html" title="进阶哈希算法跳转链接">跳转链接：进阶哈希算法</a></li>
+</ul>
+
       
 
       
@@ -158,6 +281,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -169,6 +303,25 @@
 </article>
 
   
+<nav id="article-nav">
+  
+    <a href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          一.简述lua变量类型可变特性的实现。
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/12/26/Slate%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Slate源码解读</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -190,7 +343,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，不存在的…
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AF%84%E5%88%A4%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E6%A0%87%E5%87%86"><span class="toc-number">2.</span> <span class="toc-text">评判哈希算法标准</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80hash%E6%80%9D%E8%B7%AF"><span class="toc-number">3.</span> <span class="toc-text">基础hash思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E6%B3%95%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">直接寻址法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E5%AD%97%E5%88%86%E6%9E%90%E6%B3%95%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">数字分析法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B3%E6%96%B9%E5%8F%96%E4%B8%AD%E6%B3%95%EF%BC%9A"><span class="toc-number">3.3.</span> <span class="toc-text">平方取中法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%96%E4%BD%99%E6%B3%95%EF%BC%9A"><span class="toc-number">3.4.</span> <span class="toc-text">取余法：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E4%B9%98%E5%8F%96%E6%95%B4%E6%B3%95"><span class="toc-number">3.5.</span> <span class="toc-text">相乘取整法:</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E6%95%B0%E6%B3%95"><span class="toc-number">3.6.</span> <span class="toc-text">随机数法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%98%E5%8F%A0%E6%B3%95%EF%BC%9A"><span class="toc-number">3.7.</span> <span class="toc-text">折叠法：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81"><span class="toc-number">4.</span> <span class="toc-text">哈希冲突</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%A7%E7%94%9F%E5%8E%9F%E5%9B%A0"><span class="toc-number">4.1.</span> <span class="toc-text">产生原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="toc-number">4.2.</span> <span class="toc-text">解决办法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%94%BE%E5%9C%B0%E5%9D%80%E6%B3%95"><span class="toc-number">4.2.1.</span> <span class="toc-text">开放地址法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E5%BC%8F%E5%9C%B0%E5%9D%80%E6%B3%95"><span class="toc-number">4.2.2.</span> <span class="toc-text">链式地址法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%8D%E5%93%88%E5%B8%8C%E6%B3%95"><span class="toc-number">4.2.3.</span> <span class="toc-text">再哈希法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E5%85%AC%E5%85%B1%E6%BA%A2%E5%87%BA%E5%8C%BA%E6%B3%95"><span class="toc-number">4.2.4.</span> <span class="toc-text">建立公共溢出区法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%E4%BC%98%E7%BC%BA%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">4.3.</span> <span class="toc-text">哈希冲突解决方法优缺点分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E6%94%BE%E6%95%A3%E5%88%97%EF%BC%9A%E9%93%BE%E5%BC%8F%E5%9C%B0%E5%9D%80%E6%B3%95%EF%BC%88%E6%A1%B6%E9%93%BE%E6%B3%95%EF%BC%89"><span class="toc-number">4.3.1.</span> <span class="toc-text">开放散列：链式地址法（桶链法）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%81%E9%97%AD%E6%95%A3%E5%88%97%EF%BC%9A%E5%BC%80%E6%94%BE%E5%9C%B0%E5%9D%80%E6%B3%95%EF%BC%8C%E5%86%8D%E5%93%88%E5%B8%8C%E6%B3%95-%E2%80%A6"><span class="toc-number">4.3.2.</span> <span class="toc-text">封闭散列：开放地址法，再哈希法 …</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E8%BF%9B%E9%98%B6%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-number">5.</span> <span class="toc-text">哈希算法进阶实例分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95"><span class="toc-number">6.</span> <span class="toc-text">进阶哈希算法</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -232,7 +385,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

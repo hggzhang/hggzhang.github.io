@@ -6,17 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://hggzhang.github.io">
-  <title>categories | 失落的时空图书馆</title>
+  <title>CallbackHell优化 | 失落的时空图书馆</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="https://hggzhang.github.io/categories/index.html">
+  <meta name="description" content="概述在异步操作中，常常要使用回调。但是，回调的嵌套常常会导致逻辑混乱，一步错步步错，难以维护。在Lua中，可以使用协程进行优化。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CallbackHell优化">
+<meta property="og:url" content="https://hggzhang.github.io/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/index.html">
 <meta property="og:site_name" content="失落的时空图书馆">
+<meta property="og:description" content="概述在异步操作中，常常要使用回调。但是，回调的嵌套常常会导致逻辑混乱，一步错步步错，难以维护。在Lua中，可以使用协程进行优化。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-12-18T04:30:28.000Z">
-<meta property="article:modified_time" content="2022-12-18T04:36:46.323Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/ec2701737fa8f2d06229cae9aedb9648.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/84c3b2c29f8900e497d85f840e058b82.png">
+<meta property="article:published_time" content="2022-12-26T04:11:13.000Z">
+<meta property="article:modified_time" content="2022-12-26T08:00:38.796Z">
 <meta property="article:author" content="寡人正在Coding">
+<meta property="article:tag" content="Lua">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/ec2701737fa8f2d06229cae9aedb9648.png">
   
     <link rel="alternative" href="/atom.xml" title="失落的时空图书馆" type="application/atom+xml">
   
@@ -130,27 +136,81 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="categories-" class="article article-type-categories " itemscope itemprop="blogPost">
+            <article id="lua-CallbackHell优化" class="article article-type-lua " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      categories
+      CallbackHell优化
     </h1>
   
 
         
-        <a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2022-12-18T04:30:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-18</time>
+        <a href="/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:11:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>在异步操作中，常常要使用回调。但是，回调的嵌套常常会导致逻辑混乱，一步错步步错，难以维护。在Lua中，可以使用协程进行优化。</p>
+<span id="more"></span>
+
+<h1 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h1><p>模拟一个回合制游戏攻击过程</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">PlayAnim</span><span class="params">(anim, cb)</span></span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;开始播放 &quot;</span> .. anim)</span><br><span class="line">    <span class="built_in">os</span>.<span class="built_in">execute</span>(<span class="string">&quot;sleep &quot;</span> .. <span class="number">1</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;播放完成 &quot;</span> .. anim)</span><br><span class="line">    cb()</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">Main</span><span class="params">()</span></span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;行动开始&quot;</span>)</span><br><span class="line">    PlayAnim(<span class="string">&quot;移动到目标动画&quot;</span>,<span class="function"><span class="keyword">function</span><span class="params">()</span></span> </span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;开始攻击&quot;</span>)</span><br><span class="line">        PlayAnim(<span class="string">&quot;攻击动画&quot;</span>,<span class="function"><span class="keyword">function</span><span class="params">()</span></span> </span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;返回到原位置&quot;</span>)</span><br><span class="line">            PlayAnim(<span class="string">&quot;返回动画&quot;</span>,<span class="function"><span class="keyword">function</span><span class="params">()</span></span> </span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;行动结束&quot;</span>)</span><br><span class="line">            <span class="keyword">end</span>)</span><br><span class="line">        <span class="keyword">end</span>)</span><br><span class="line">    <span class="keyword">end</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">Main()</span><br></pre></td></tr></table></figure>
+<p>输出：<br><img src="https://img-blog.csdnimg.cn/img_convert/ec2701737fa8f2d06229cae9aedb9648.png" alt="image"></p>
+<ul>
+<li>可以看到异步回调的嵌套导致代码结构混乱</li>
+</ul>
+<h1 id="Lua协程"><a href="#Lua协程" class="headerlink" title="Lua协程"></a>Lua协程</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><ul>
+<li>Lua 协同程序(coroutine)与线程比较类似：拥有独立的堆栈，独立的局部变量，独立的指令指针，同时又与其它协同程序共享全局变量和其它大部分东西。</li>
+<li>线程与协同程序的主要区别在于，一个具有多个线程的程序可以同时运行几个线程，而协同程序却需要彼此协作的运行。在任一指定时刻只有一个协同程序在运行，并且这个正在运行的协同程序只有在明确的被要求挂起的时候才会被挂起。</li>
+<li>协同程序有点类似同步的多线程，在等待同一个线程锁的几个线程有点类似协同。</li>
+<li>coroutine在底层实现就是一个线程。</li>
+</ul>
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><table>
+<thead>
+<tr>
+<th>API</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>coroutine.create()</td>
+<td>创建 coroutine，返回 coroutine， 参数是一个函数，当和 resume 配合使用的时候就唤醒函数调用</td>
+</tr>
+<tr>
+<td>coroutine.resume()</td>
+<td>重启 coroutine，和 create 配合使用</td>
+</tr>
+<tr>
+<td>coroutine.yield()</td>
+<td>挂起 coroutine，将 coroutine 设置为挂起状态，这个和 resume 配合使用能有很多有用的效果</td>
+</tr>
+<tr>
+<td>coroutine.status()</td>
+<td>查看 coroutine 的状态。注：coroutine 的状态有三种：dead，suspended，running</td>
+</tr>
+<tr>
+<td>coroutine.wrap（）</td>
+<td>创建 coroutine，返回一个函数，一旦你调用这个函数，就进入 coroutine，和 create 功能重复</td>
+</tr>
+<tr>
+<td>coroutine.running()</td>
+<td>返回正在跑的 coroutine，一个 coroutine 就是一个线程，当使用running的时候，就是返回一个 corouting 的线程号</td>
+</tr>
+</tbody></table>
+<h2 id="详细介绍"><a href="#详细介绍" class="headerlink" title="详细介绍"></a>详细介绍</h2><p>请参考跳转链接：<a target="_blank" rel="noopener" href="https://www.runoob.com/lua/lua-coroutine.html" title="菜鸟教程-协程">菜鸟教程-协程</a></p>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">AsyncFunc</span><span class="params">(func)</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span><span class="params">(...)</span></span></span><br><span class="line">        <span class="keyword">local</span> current_co = <span class="built_in">coroutine</span>.<span class="built_in">running</span>()</span><br><span class="line">        <span class="keyword">local</span> ret, res = <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">        <span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">cb</span><span class="params">(...)</span></span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">coroutine</span>.<span class="built_in">resume</span>(current_co, ...) <span class="keyword">then</span></span><br><span class="line">                ret = <span class="literal">true</span></span><br><span class="line">                res = ...</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">local</span> params = <span class="built_in">table</span>.pack(...)</span><br><span class="line">        <span class="built_in">table</span>.<span class="built_in">insert</span>(params, cb)</span><br><span class="line">        func(<span class="built_in">table</span>.<span class="built_in">unpack</span>(params))</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> ret <span class="keyword">then</span></span><br><span class="line">            res = <span class="built_in">coroutine</span>.<span class="built_in">yield</span>()</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">BeginTask</span><span class="params">(func, ...)</span></span></span><br><span class="line">    <span class="keyword">local</span> t = <span class="built_in">coroutine</span>.<span class="built_in">create</span>(func)</span><br><span class="line">    <span class="built_in">coroutine</span>.<span class="built_in">resume</span>(t, ...)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">PlayAnim</span><span class="params">(anim, cb)</span></span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;开始播放 &quot;</span> .. anim)</span><br><span class="line">    <span class="built_in">os</span>.<span class="built_in">execute</span>(<span class="string">&quot;sleep &quot;</span> .. <span class="number">1</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;播放完成 &quot;</span> .. anim)</span><br><span class="line">    cb()</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> AsyncPlayAnim = AsyncFunc(PlayAnim)</span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">Main</span><span class="params">()</span></span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;行动开始&quot;</span>)</span><br><span class="line">    AsyncPlayAnim(<span class="string">&quot;移动到目标动画&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;开始攻击&quot;</span>)</span><br><span class="line">    AsyncPlayAnim(<span class="string">&quot;攻击动画&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;返回到原位置&quot;</span>)</span><br><span class="line">    AsyncPlayAnim(<span class="string">&quot;返回动画&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;行动结束&quot;</span>)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">BeginTask(Main)</span><br></pre></td></tr></table></figure>
+<p>输出：<br><img src="https://img-blog.csdnimg.cn/img_convert/84c3b2c29f8900e497d85f840e058b82.png" alt="image"></p>
+<ul>
+<li>用AsyncFunc和BeginTask分别对异步函数和协程创建和运行做了封装</li>
+<li>注意：不能在主协程中运行AsyncFunc，用BeginTask开启一个新的协程运行Main</li>
+</ul>
+
       
 
       
@@ -158,6 +218,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -169,6 +240,25 @@
 </article>
 
   
+<nav id="article-nav">
+  
+    <a href="/2022/12/26/Lua%E6%94%AF%E6%8C%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Lua支持虚函数的解决方案
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/12/26/%E5%8A%A8%E6%80%81%E6%A0%BC%E5%AD%90%E7%AE%97%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">动态格子算法</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -190,7 +280,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，不存在的…
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">问题分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Lua%E5%8D%8F%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">Lua协程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">3.1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#API"><span class="toc-number">3.2.</span> <span class="toc-text">API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%A6%E7%BB%86%E4%BB%8B%E7%BB%8D"><span class="toc-number">3.3.</span> <span class="toc-text">详细介绍</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">4.</span> <span class="toc-text">解决方案</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -232,7 +322,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

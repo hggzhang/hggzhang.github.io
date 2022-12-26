@@ -130,6 +130,702 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-二、详解String数据结构及操作算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/">二.详解String数据结构及操作算法</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:15:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>lua字符串通过操作算法和内存管理，有以下优点：</p>
+<ul>
+<li>节省内存。</li>
+<li>字符串比较效率高。（比较哈希值）
+        
+          <a class="article-more-a" href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-一、简述lua变量类型可变特性的实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/">一.简述lua变量类型可变特性的实现。</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:14:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>lua是由C语言编写，运行在虚拟机上的弱类型解释型语言。</p>
+<ul>
+<li>lua变量为什么可以任意改变类型？
+        
+          <a class="article-more-a" href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="hash-哈希表和算法思路详解" class="article article-type-hash  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/">哈希表和算法思路详解</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:13:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><ul>
+<li>哈希表是一种可以满足快速查找数据结构，时间复杂度接近O(1)。</li>
+<li>哈希函数是无限集到有限集的映射。</li>
+<li>处理数据量大，查找效率要求高时推荐使用hash容器。
+        
+          <a class="article-more-a" href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="ue4.25-Slate源码解读" class="article article-type-ue4.25  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/Slate%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/">Slate源码解读</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/Slate%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:12:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Slate系统是UE的一套UI解决方案，UMG系统也是依赖Slate系统实现的。</p>
+        
+          <a class="article-more-a" href="/2022/12/26/Slate%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">UE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/Slate%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-类暗黑破坏神属性系统思路" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/%E7%B1%BB%E6%9A%97%E9%BB%91%E7%A0%B4%E5%9D%8F%E7%A5%9E%E5%B1%9E%E6%80%A7%E7%B3%BB%E7%BB%9F%E6%80%9D%E8%B7%AF/">类暗黑破坏神属性系统思路</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/%E7%B1%BB%E6%9A%97%E9%BB%91%E7%A0%B4%E5%9D%8F%E7%A5%9E%E5%B1%9E%E6%80%A7%E7%B3%BB%E7%BB%9F%E6%80%9D%E8%B7%AF/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:12:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>此思路是个人的思路，不代表暗黑破坏神等游戏的实际实现思路。核心代码示例使用C++语言，注意代码示例可能是代码片段，需要读者有游戏业务基础概念和C++语言基础。</p>
+<p>游戏业务思路往往是比较开放的，其实不仅是游戏业务思路，个人接触到的游戏引擎Unity,Unreal，Cocos,还有以前公司的自研引擎对游戏世界的对象理解，gamePlay框架等很多方面的解决方案都存在差异。简单来说，以最小的维护成本满足需求才是王道。</p>
+<p>暗黑破坏神，流放之路，火炬之光等经典RPG游戏有令人眼花缭乱的角色属性词缀和相应的机制，搭配修改角色属性的装备，技能，Buff等形成很多有趣的流派。此文提供一种类似游戏的角色相关模块的实现思路，以角色属性子模块实现为引，也会涉及到其他角色相关系统。</p>
+        
+          <a class="article-more-a" href="/2022/12/26/%E7%B1%BB%E6%9A%97%E9%BB%91%E7%A0%B4%E5%9D%8F%E7%A5%9E%E5%B1%9E%E6%80%A7%E7%B3%BB%E7%BB%9F%E6%80%9D%E8%B7%AF/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">游戏业务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/%E7%B1%BB%E6%9A%97%E9%BB%91%E7%A0%B4%E5%9D%8F%E7%A5%9E%E5%B1%9E%E6%80%A7%E7%B3%BB%E7%BB%9F%E6%80%9D%E8%B7%AF/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-Lua支持虚函数的解决方案" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/Lua%E6%94%AF%E6%8C%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">Lua支持虚函数的解决方案</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/Lua%E6%94%AF%E6%8C%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:11:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>lua的__index元方法本身没有提供类似C++虚函数机制，调用的父类方法调用虚函数可能会出现问题。</p>
+        
+          <a class="article-more-a" href="/2022/12/26/Lua%E6%94%AF%E6%8C%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/Lua%E6%94%AF%E6%8C%81%E8%99%9A%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="lua-CallbackHell优化" class="article article-type-lua  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/">CallbackHell优化</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:11:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>在异步操作中，常常要使用回调。但是，回调的嵌套常常会导致逻辑混乱，一步错步步错，难以维护。在Lua中，可以使用协程进行优化。</p>
+        
+          <a class="article-more-a" href="/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/CallbackHell%E4%BC%98%E5%8C%96/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-动态格子算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/%E5%8A%A8%E6%80%81%E6%A0%BC%E5%AD%90%E7%AE%97%E6%B3%95/">动态格子算法</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/%E5%8A%A8%E6%80%81%E6%A0%BC%E5%AD%90%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:10:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>动态格子算法常用于弹幕游戏的碰撞检测优化，可减少遍历开销。</p>
+        
+          <a class="article-more-a" href="/2022/12/26/%E5%8A%A8%E6%80%81%E6%A0%BC%E5%AD%90%E7%AE%97%E6%B3%95/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/%E5%8A%A8%E6%80%81%E6%A0%BC%E5%AD%90%E7%AE%97%E6%B3%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-AStar寻路算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/26/AStar%E5%AF%BB%E8%B7%AF%E7%AE%97%E6%B3%95/">AStar寻路算法</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/26/AStar%E5%AF%BB%E8%B7%AF%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:10:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><blockquote>
+<p>AStar算法是一种图形搜索算法，常用于寻路。他是以广度优先搜索为基础，集Dijkstra算法和最佳优先(best fit)于一身的一种算法。</p>
+</blockquote>
+        
+          <a class="article-more-a" href="/2022/12/26/AStar%E5%AF%BB%E8%B7%AF%E7%AE%97%E6%B3%95/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/26/AStar%E5%AF%BB%E8%B7%AF%E7%AE%97%E6%B3%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-地下城图块生成算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -173,17 +869,6 @@
 	</div>
 
       
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/算法//" class="article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
 
       
         <p class="article-more-link">
@@ -303,6 +988,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Lua</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">UE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">游戏业务</a>
               </li>
             
             <div class="clearfix"></div>

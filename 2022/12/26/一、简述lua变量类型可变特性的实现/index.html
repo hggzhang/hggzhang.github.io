@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://hggzhang.github.io">
-  <title>categories | 失落的时空图书馆</title>
+  <title>一.简述lua变量类型可变特性的实现。 | 失落的时空图书馆</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="https://hggzhang.github.io/categories/index.html">
+  <meta name="description" content="概述lua是由C语言编写，运行在虚拟机上的弱类型解释型语言。  lua变量为什么可以任意改变类型？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一.简述lua变量类型可变特性的实现。">
+<meta property="og:url" content="https://hggzhang.github.io/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
 <meta property="og:site_name" content="失落的时空图书馆">
+<meta property="og:description" content="概述lua是由C语言编写，运行在虚拟机上的弱类型解释型语言。  lua变量为什么可以任意改变类型？">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-12-18T04:30:28.000Z">
-<meta property="article:modified_time" content="2022-12-18T04:36:46.323Z">
+<meta property="article:published_time" content="2022-12-26T04:14:24.000Z">
+<meta property="article:modified_time" content="2022-12-26T08:03:26.268Z">
 <meta property="article:author" content="寡人正在Coding">
+<meta property="article:tag" content="Lua">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="失落的时空图书馆" type="application/atom+xml">
@@ -130,27 +133,58 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="categories-" class="article article-type-categories " itemscope itemprop="blogPost">
+            <article id="post-一、简述lua变量类型可变特性的实现" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      categories
+      一.简述lua变量类型可变特性的实现。
     </h1>
   
 
         
-        <a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2022-12-18T04:30:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-18</time>
+        <a href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:14:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>lua是由C语言编写，运行在虚拟机上的弱类型解释型语言。</p>
+<ul>
+<li>lua变量为什么可以任意改变类型？<span id="more"></span></li>
+</ul>
+<h1 id="切豆腐理论"><a href="#切豆腐理论" class="headerlink" title="切豆腐理论"></a>切豆腐理论</h1><blockquote>
+<p>对于硬盘上保存的数据来说,其本身不具备“意义”,其含义取决于我们如何解释这一段数据</p>
+</blockquote>
+<ul>
+<li>首地址 + 长度 确定内存上的一段数据。</li>
+<li>编码&#x2F;解码 赋予这段数据意义。</li>
+</ul>
+<h1 id="TValue"><a href="#TValue" class="headerlink" title="TValue"></a>TValue</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">union</span> <span class="title">Value</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">GCObject</span> *<span class="title">gc</span>;</span>    <span class="comment">/* collectable objects */</span></span><br><span class="line">  <span class="type">void</span> *p;         <span class="comment">/* light userdata */</span></span><br><span class="line">  lua_CFunction f; <span class="comment">/* light C functions */</span></span><br><span class="line">  lua_Integer i;   <span class="comment">/* integer numbers */</span></span><br><span class="line">  lua_Number n;    <span class="comment">/* float numbers */</span></span><br><span class="line">&#125; Value;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TValuefields	Value value_; lu_byte tt_</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">TValue</span> &#123;</span></span><br><span class="line">  TValuefields;</span><br><span class="line">&#125; TValue;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用union特性。</li>
+<li>tt_ 类型（长度）（C语言）。</li>
+<li>value_ 首地址。</li>
+</ul>
+<h2 id="setfltvalue"><a href="#setfltvalue" class="headerlink" title="setfltvalue"></a>setfltvalue</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> val_(o)		((o)-&gt;value_)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> settt_(o,t)	((o)-&gt;tt_=(t))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LUA_TNUMBER		3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LUA_VNUMFLT	makevariant(LUA_TNUMBER, 1)  <span class="comment">/* float numbers */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> setfltvalue(obj,x) \</span></span><br><span class="line"><span class="meta">  &#123; TValue *io=(obj); val_(io).n=(x); settt_(io, LUA_VNUMFLT); &#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>浮点类型编码：</p>
+<ul>
+<li>val_ 值，n是上述的value_。</li>
+<li>settt_ 类型。</li>
+</ul>
+<h2 id="tonumber"><a href="#tonumber" class="headerlink" title="tonumber"></a>tonumber</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> rawtt(o)	((o)-&gt;tt_)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> checktag(o,t)		(rawtt(o) == (t))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ttisfloat(o)		checktag((o), LUA_VNUMFLT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> check_exp(c,e)		(e)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> fltvalue(o)	check_exp(ttisfloat(o), val_(o).n)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> tonumber(o,n) \</span></span><br><span class="line"><span class="meta">	(ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))</span></span><br></pre></td></tr></table></figure>
+<p>浮点类型解码：</p>
+<ul>
+<li>ttisfloat 类型测试。</li>
+<li>fltvalue 解码赋给n。</li>
+<li>luaV_tonumber_ 尝试类型转换。</li>
+<li>注意三元运算符和逗号运算符的语义。</li>
+</ul>
+
       
 
       
@@ -158,6 +192,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -169,6 +214,25 @@
 </article>
 
   
+<nav id="article-nav">
+  
+    <a href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          二.详解String数据结构及操作算法
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/12/26/%E5%93%88%E5%B8%8C%E8%A1%A8%E5%92%8C%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF%E8%AF%A6%E8%A7%A3/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">哈希表和算法思路详解</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -190,7 +254,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，不存在的…
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%87%E8%B1%86%E8%85%90%E7%90%86%E8%AE%BA"><span class="toc-number">2.</span> <span class="toc-text">切豆腐理论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#TValue"><span class="toc-number">3.</span> <span class="toc-text">TValue</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#setfltvalue"><span class="toc-number">3.1.</span> <span class="toc-text">setfltvalue</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tonumber"><span class="toc-number">3.2.</span> <span class="toc-text">tonumber</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
@@ -232,7 +296,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

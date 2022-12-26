@@ -6,14 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://hggzhang.github.io">
-  <title>Category: 算法 | 失落的时空图书馆</title>
+  <title>二.详解String数据结构及操作算法 | 失落的时空图书馆</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="失落的时空图书馆">
-<meta property="og:url" content="https://hggzhang.github.io/categories/%E7%AE%97%E6%B3%95/index.html">
+  <meta name="description" content="概述lua字符串通过操作算法和内存管理，有以下优点：  节省内存。 字符串比较效率高。（比较哈希值）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二.详解String数据结构及操作算法">
+<meta property="og:url" content="https://hggzhang.github.io/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/index.html">
 <meta property="og:site_name" content="失落的时空图书馆">
+<meta property="og:description" content="概述lua字符串通过操作算法和内存管理，有以下优点：  节省内存。 字符串比较效率高。（比较哈希值）">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-26T04:15:05.000Z">
+<meta property="article:modified_time" content="2022-12-26T08:03:55.018Z">
 <meta property="article:author" content="寡人正在Coding">
+<meta property="article:tag" content="Lua">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="失落的时空图书馆" type="application/atom+xml">
@@ -128,71 +133,200 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-二、详解String数据结构及操作算法" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2022" class="archive-year">2022</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/12/18/%E5%9C%B0%E4%B8%8B%E5%9F%8E%E5%9B%BE%E5%9D%97%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/" class="archive-article-date">
-  	<time datetime="2022-12-18T13:43:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-18</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/12/18/%E5%9C%B0%E4%B8%8B%E5%9F%8E%E5%9B%BE%E5%9D%97%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95/">地下城图块生成算法</a>
+    <h1 class="article-title" itemprop="name">
+      二.详解String数据结构及操作算法
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2022/12/26/%E4%BA%8C%E3%80%81%E8%AF%A6%E8%A7%A3String%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2022-12-26T04:15:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>lua字符串通过操作算法和内存管理，有以下优点：</p>
+<ul>
+<li>节省内存。</li>
+<li>字符串比较效率高。（比较哈希值）<span id="more"></span>
+问题：</li>
+<li>相同的字符串共享同一份内存么？</li>
+<li>相同的长字符串一定不共享同一份内存么？</li>
+<li>lua字符串如何管理内存？</li>
+</ul>
+<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><h2 id="lua字符串TString"><a href="#lua字符串TString" class="headerlink" title="lua字符串TString"></a>lua字符串TString</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">TString</span> &#123;</span></span><br><span class="line">  CommonHeader;</span><br><span class="line">  lu_byte extra;  <span class="comment">/* reserved words for short strings; &quot;has hash&quot; for longs */</span></span><br><span class="line">  lu_byte shrlen;  <span class="comment">/* length for short strings */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> hash;</span><br><span class="line">  <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">    <span class="type">size_t</span> lnglen;  <span class="comment">/* length for long strings */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">TString</span> *<span class="title">hnext</span>;</span>  <span class="comment">/* linked list for hash table */</span></span><br><span class="line">  &#125; u;</span><br><span class="line">  <span class="type">char</span> contents[<span class="number">1</span>];</span><br><span class="line">&#125; TString;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>lu_byte extra的reserved words语义是否是保留字。（保留字：local，if, …）</li>
+<li>char contents[1] 是存放字符串内存数据的指针。<ul>
+<li>与char*相比，使用char[]在struct后面一次分配内存。</li>
+</ul>
+</li>
+</ul>
+<h2 id="全局字符串表stringtable"><a href="#全局字符串表stringtable" class="headerlink" title="全局字符串表stringtable"></a>全局字符串表stringtable</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">stringtable</span> &#123;</span></span><br><span class="line">  TString **hash;</span><br><span class="line">  <span class="type">int</span> nuse;  <span class="comment">/* number of elements */</span></span><br><span class="line">  <span class="type">int</span> size;</span><br><span class="line">&#125; stringtable;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>lua会把所有字符串统一在全局的stringtable结构中管理。</li>
+<li>hash 使用散列表存放string。</li>
+</ul>
+<h1 id="操作算法"><a href="#操作算法" class="headerlink" title="操作算法"></a>操作算法</h1><h2 id="luaS-new-创建字符串对外接口"><a href="#luaS-new-创建字符串对外接口" class="headerlink" title="luaS_new 创建字符串对外接口"></a>luaS_new 创建字符串对外接口</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** Create or reuse a zero-terminated string, first checking in the</span></span><br><span class="line"><span class="comment">** cache (using the string address as a key). The cache can contain</span></span><br><span class="line"><span class="comment">** only zero-terminated strings, so it is safe to use &#x27;strcmp&#x27; to</span></span><br><span class="line"><span class="comment">** check hits.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">TString *<span class="title function_">luaS_new</span> <span class="params">(lua_State *L, <span class="type">const</span> <span class="type">char</span> *str)</span> &#123;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> i = point2uint(str) % STRCACHE_N;  <span class="comment">/* hash */</span></span><br><span class="line">  <span class="type">int</span> j;</span><br><span class="line">  TString **p = G(L)-&gt;strcache[i];</span><br><span class="line">  <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; STRCACHE_M; j++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(str, getstr(p[j])) == <span class="number">0</span>)  <span class="comment">/* hit? */</span></span><br><span class="line">      <span class="keyword">return</span> p[j];  <span class="comment">/* that is it */</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/* normal route */</span></span><br><span class="line">  <span class="keyword">for</span> (j = STRCACHE_M - <span class="number">1</span>; j &gt; <span class="number">0</span>; j--)</span><br><span class="line">    p[j] = p[j - <span class="number">1</span>];  <span class="comment">/* move out last element */</span></span><br><span class="line">  <span class="comment">/* new element is first in the list */</span></span><br><span class="line">  p[<span class="number">0</span>] = luaS_newlstr(L, str, <span class="built_in">strlen</span>(str));</span><br><span class="line">  <span class="keyword">return</span> p[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>先在缓存中查找，命中直接返回结果，否则创建新对象并写入缓存。</li>
+<li>一些文章说lua字串是全局表里的唯一对象，情况如下：<ul>
+<li>lua5.1:不管长短串，都写入全局表和查重。</li>
+<li>lua5.2:只有短串写入全局表和查重。</li>
+<li>lua5.3&amp;lua5.4:在lua5.2版本的基础上，先查缓存。</li>
+</ul>
+</li>
+</ul>
+<h2 id="luaS-newlstr-创建字符串"><a href="#luaS-newlstr-创建字符串" class="headerlink" title="luaS_newlstr 创建字符串"></a>luaS_newlstr 创建字符串</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** new string (with explicit length)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">TString *<span class="title function_">luaS_newlstr</span> <span class="params">(lua_State *L, <span class="type">const</span> <span class="type">char</span> *str, <span class="type">size_t</span> l)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (l &lt;= LUAI_MAXSHORTLEN)  <span class="comment">/* short string? */</span></span><br><span class="line">    <span class="keyword">return</span> internshrstr(L, str, l);</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    TString *ts;</span><br><span class="line">    <span class="keyword">if</span> (unlikely(l &gt;= (MAX_SIZE - <span class="keyword">sizeof</span>(TString))/<span class="keyword">sizeof</span>(<span class="type">char</span>)))</span><br><span class="line">      luaM_toobig(L);</span><br><span class="line">    ts = luaS_createlngstrobj(L, l);</span><br><span class="line">    <span class="built_in">memcpy</span>(getstr(ts), str, l * <span class="keyword">sizeof</span>(<span class="type">char</span>));</span><br><span class="line">    <span class="keyword">return</span> ts;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>长串or短串类型测试和处理。</li>
+<li>长串长度边界测试。</li>
+</ul>
+<h2 id="internshrstr-创建短字符串"><a href="#internshrstr-创建短字符串" class="headerlink" title="internshrstr 创建短字符串"></a>internshrstr 创建短字符串</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** Checks whether short string exists and reuses it or creates a new one.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">static</span> TString *<span class="title function_">internshrstr</span> <span class="params">(lua_State *L, <span class="type">const</span> <span class="type">char</span> *str, <span class="type">size_t</span> l)</span> &#123;</span><br><span class="line">  TString *ts;</span><br><span class="line">  global_State *g = G(L);</span><br><span class="line">  stringtable *tb = &amp;g-&gt;strt;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> h = luaS_hash(str, l, g-&gt;seed, <span class="number">1</span>);</span><br><span class="line">  TString **<span class="built_in">list</span> = &amp;tb-&gt;hash[lmod(h, tb-&gt;size)];</span><br><span class="line">  lua_assert(str != <span class="literal">NULL</span>);  <span class="comment">/* otherwise &#x27;memcmp&#x27;/&#x27;memcpy&#x27; are undefined */</span></span><br><span class="line">  <span class="keyword">for</span> (ts = *<span class="built_in">list</span>; ts != <span class="literal">NULL</span>; ts = ts-&gt;u.hnext) &#123;</span><br><span class="line">    <span class="keyword">if</span> (l == ts-&gt;shrlen &amp;&amp; (<span class="built_in">memcmp</span>(str, getstr(ts), l * <span class="keyword">sizeof</span>(<span class="type">char</span>)) == <span class="number">0</span>)) &#123;</span><br><span class="line">      <span class="comment">/* found! */</span></span><br><span class="line">      <span class="keyword">if</span> (isdead(g, ts))  <span class="comment">/* dead (but not collected yet)? */</span></span><br><span class="line">        changewhite(ts);  <span class="comment">/* resurrect it */</span></span><br><span class="line">      <span class="keyword">return</span> ts;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">/* else must create a new string */</span></span><br><span class="line">  <span class="keyword">if</span> (tb-&gt;nuse &gt;= tb-&gt;size) &#123;  <span class="comment">/* need to grow string table? */</span></span><br><span class="line">    growstrtab(L, tb);</span><br><span class="line">    <span class="built_in">list</span> = &amp;tb-&gt;hash[lmod(h, tb-&gt;size)];  <span class="comment">/* rehash with new size */</span></span><br><span class="line">  &#125;</span><br><span class="line">  ts = createstrobj(L, l, LUA_VSHRSTR, h);</span><br><span class="line">  <span class="built_in">memcpy</span>(getstr(ts), str, l * <span class="keyword">sizeof</span>(<span class="type">char</span>));</span><br><span class="line">  ts-&gt;shrlen = cast_byte(l);</span><br><span class="line">  ts-&gt;u.hnext = *<span class="built_in">list</span>;</span><br><span class="line">  *<span class="built_in">list</span> = ts;</span><br><span class="line">  tb-&gt;nuse++;</span><br><span class="line">  <span class="keyword">return</span> ts;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>计算字符串的哈希值，找到对应的桶，在桶查找相同的串，命中进行垃圾收集测试并返回，否则创建新的串放入桶中。<ul>
+<li>垃圾收集测试命中则清除垃圾收集标记。</li>
+</ul>
+</li>
+<li>哈希表装填因子测试，命中哈希表生长。</li>
+</ul>
+<h2 id="createstrobj-创建字符串对象"><a href="#createstrobj-创建字符串对象" class="headerlink" title="createstrobj 创建字符串对象"></a>createstrobj 创建字符串对象</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** creates a new string object</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">static</span> TString *<span class="title function_">createstrobj</span> <span class="params">(lua_State *L, <span class="type">size_t</span> l, <span class="type">int</span> tag, <span class="type">unsigned</span> <span class="type">int</span> h)</span> &#123;</span><br><span class="line">  TString *ts;</span><br><span class="line">  GCObject *o;</span><br><span class="line">  <span class="type">size_t</span> totalsize;  <span class="comment">/* total size of TString object */</span></span><br><span class="line">  totalsize = sizelstring(l);</span><br><span class="line">  o = luaC_newobj(L, tag, totalsize);</span><br><span class="line">  ts = gco2ts(o);</span><br><span class="line">  ts-&gt;hash = h;</span><br><span class="line">  ts-&gt;extra = <span class="number">0</span>;</span><br><span class="line">  getstr(ts)[l] = <span class="string">&#x27;\0&#x27;</span>;  <span class="comment">/* ending 0 */</span></span><br><span class="line">  <span class="keyword">return</span> ts;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>动态计算内存大小，一次申请内存并填充字符串。（一次申请内存TString的char contents[1]特性）。</li>
+</ul>
+<h2 id="sizelstring-动态计算TString结构体内存"><a href="#sizelstring-动态计算TString结构体内存" class="headerlink" title="sizelstring 动态计算TString结构体内存"></a>sizelstring 动态计算TString结构体内存</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> offsetof(s,m) ((size_t)&amp;(((s*)0)-&gt;m))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> sizelstring(l)  (offsetof(TString, contents) + ((l) + 1) * sizeof(char))</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>offsetof 语义为成员变量m相对于结构体首地址的内存偏移。</li>
+<li>sizelstring(l) 动态计算结构体TString内存大小 &#x3D; contents内存偏移 + （size + 1）* sizeof(char))。<ul>
+<li>（size + 1） 包含’\0’字符串结束符。</li>
+</ul>
+</li>
+</ul>
+<h2 id="growstrtab-字符串哈希表生长"><a href="#growstrtab-字符串哈希表生长" class="headerlink" title="growstrtab 字符串哈希表生长"></a>growstrtab 字符串哈希表生长</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">growstrtab</span> <span class="params">(lua_State *L, stringtable *tb)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (unlikely(tb-&gt;nuse == MAX_INT)) &#123;  <span class="comment">/* too many strings? */</span></span><br><span class="line">    luaC_fullgc(L, <span class="number">1</span>);  <span class="comment">/* try to free some... */</span></span><br><span class="line">    <span class="keyword">if</span> (tb-&gt;nuse == MAX_INT)  <span class="comment">/* still too many? */</span></span><br><span class="line">      luaM_error(L);  <span class="comment">/* cannot even create a message... */</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (tb-&gt;size &lt;= MAXSTRTB / <span class="number">2</span>)  <span class="comment">/* can grow string table? */</span></span><br><span class="line">    luaS_resize(L, tb-&gt;size * <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>一系列边界测试，通过则生长为原来的2倍。</li>
+</ul>
+<h2 id="luaS-resize-重置字符串哈希表的大小"><a href="#luaS-resize-重置字符串哈希表的大小" class="headerlink" title="luaS_resize 重置字符串哈希表的大小"></a>luaS_resize 重置字符串哈希表的大小</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** Resize the string table. If allocation fails, keep the current size.</span></span><br><span class="line"><span class="comment">** (This can degrade performance, but any non-zero size should work</span></span><br><span class="line"><span class="comment">** correctly.)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">luaS_resize</span> <span class="params">(lua_State *L, <span class="type">int</span> nsize)</span> &#123;</span><br><span class="line">  stringtable *tb = &amp;G(L)-&gt;strt;</span><br><span class="line">  <span class="type">int</span> osize = tb-&gt;size;</span><br><span class="line">  TString **newvect;</span><br><span class="line">  <span class="keyword">if</span> (nsize &lt; osize)  <span class="comment">/* shrinking table? */</span></span><br><span class="line">    tablerehash(tb-&gt;hash, osize, nsize);  <span class="comment">/* depopulate shrinking part */</span></span><br><span class="line">  newvect = luaM_reallocvector(L, tb-&gt;hash, osize, nsize, TString*);</span><br><span class="line">  <span class="keyword">if</span> (unlikely(newvect == <span class="literal">NULL</span>)) &#123;  <span class="comment">/* reallocation failed? */</span></span><br><span class="line">    <span class="keyword">if</span> (nsize &lt; osize)  <span class="comment">/* was it shrinking table? */</span></span><br><span class="line">      tablerehash(tb-&gt;hash, nsize, osize);  <span class="comment">/* restore to original size */</span></span><br><span class="line">    <span class="comment">/* leave table as it was */</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;  <span class="comment">/* allocation succeeded */</span></span><br><span class="line">    tb-&gt;hash = newvect;</span><br><span class="line">    tb-&gt;size = nsize;</span><br><span class="line">    <span class="keyword">if</span> (nsize &gt; osize)</span><br><span class="line">      tablerehash(newvect, osize, nsize);  <span class="comment">/* rehash for new size */</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>若nsize &lt; osize 先把原来的元素重新散列到nsize长度的桶里，再内存收紧。</li>
+<li>若nsize &gt; osize 先内存扩容，若扩容成功把原来的元素散列到桶里，否则保持不变。</li>
+</ul>
+<h2 id="tablerehash-重新计算哈希"><a href="#tablerehash-重新计算哈希" class="headerlink" title="tablerehash 重新计算哈希"></a>tablerehash 重新计算哈希</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">tablerehash</span> <span class="params">(TString **vect, <span class="type">int</span> osize, <span class="type">int</span> nsize)</span> &#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line">  <span class="keyword">for</span> (i = osize; i &lt; nsize; i++)  <span class="comment">/* clear new elements */</span></span><br><span class="line">    vect[i] = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; osize; i++) &#123;  <span class="comment">/* rehash old part of the array */</span></span><br><span class="line">    TString *p = vect[i];</span><br><span class="line">    vect[i] = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">while</span> (p) &#123;  <span class="comment">/* for each string in the list */</span></span><br><span class="line">      TString *hnext = p-&gt;u.hnext;  <span class="comment">/* save next */</span></span><br><span class="line">      <span class="type">unsigned</span> <span class="type">int</span> h = lmod(p-&gt;hash, nsize);  <span class="comment">/* new position */</span></span><br><span class="line">      p-&gt;u.hnext = vect[h];  <span class="comment">/* chain it into array */</span></span><br><span class="line">      vect[h] = p;</span><br><span class="line">      p = hnext;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>重新散列元素</li>
+<li>此算法某些元素可能会重复被计算。<ul>
+<li>如元素E本来放在1号桶里，哈希取模后放到了2号桶里。遍历扫到2号桶，E又计算一遍位置还是放在2号桶。</li>
+</ul>
+</li>
+</ul>
+<h2 id="luaS-hash-字符串哈希算法"><a href="#luaS-hash-字符串哈希算法" class="headerlink" title="luaS_hash 字符串哈希算法"></a>luaS_hash 字符串哈希算法</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">luaS_hash</span> <span class="params">(<span class="type">const</span> <span class="type">char</span> *str, <span class="type">size_t</span> l, <span class="type">unsigned</span> <span class="type">int</span> seed,</span></span><br><span class="line"><span class="params">                        <span class="type">size_t</span> step)</span> &#123;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> h = seed ^ cast_uint(l);</span><br><span class="line">  <span class="keyword">for</span> (; l &gt;= step; l -= step)</span><br><span class="line">    h ^= ((h&lt;&lt;<span class="number">5</span>) + (h&gt;&gt;<span class="number">2</span>) + cast_byte(str[l - <span class="number">1</span>]));</span><br><span class="line">  <span class="keyword">return</span> h;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>类似线性同余法的随机数生成算法。</li>
+<li>算法思路剖析参考下面链接我的另一篇关于hash文章中的：hash算法进阶实例分析。<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hggzhang/p/16441310.html" title="跳转链接：Hash 哈希表和算法思路详解">跳转链接：Hash 哈希表和算法思路详解</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="lmod"><a href="#lmod" class="headerlink" title="lmod"></a>lmod</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** &#x27;module&#x27; operation for hashing (size is always a power of 2)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> lmod(s,size) \</span></span><br><span class="line"><span class="meta">	(check_exp((size&amp;(size-1))==0, (cast_int((s) &amp; ((size)-1)))))</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>取余，size必须是2的n次幂，此算法才成立。</li>
+</ul>
+<h2 id="luaM-reallocvector-重新分配顺序表内存"><a href="#luaM-reallocvector-重新分配顺序表内存" class="headerlink" title="luaM_reallocvector 重新分配顺序表内存"></a>luaM_reallocvector 重新分配顺序表内存</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> firsttry(g,block,os,ns)    ((*g-&gt;frealloc)(g-&gt;ud, block, os, ns))</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">** Generic allocation routine.</span></span><br><span class="line"><span class="comment">** If allocation fails while shrinking a block, do not try again; the</span></span><br><span class="line"><span class="comment">** GC shrinks some blocks and it is not reentrant.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">void</span> *<span class="title function_">luaM_realloc_</span> <span class="params">(lua_State *L, <span class="type">void</span> *block, <span class="type">size_t</span> osize, <span class="type">size_t</span> nsize)</span> &#123;</span><br><span class="line">  <span class="type">void</span> *newblock;</span><br><span class="line">  global_State *g = G(L);</span><br><span class="line">  lua_assert((osize == <span class="number">0</span>) == (block == <span class="literal">NULL</span>));</span><br><span class="line">  newblock = firsttry(g, block, osize, nsize);</span><br><span class="line">  <span class="keyword">if</span> (unlikely(newblock == <span class="literal">NULL</span> &amp;&amp; nsize &gt; <span class="number">0</span>)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (nsize &gt; osize)  <span class="comment">/* not shrinking a block? */</span></span><br><span class="line">      newblock = tryagain(L, block, osize, nsize);</span><br><span class="line">    <span class="keyword">if</span> (newblock == <span class="literal">NULL</span>)  <span class="comment">/* still no memory? */</span></span><br><span class="line">      <span class="keyword">return</span> <span class="literal">NULL</span>;  <span class="comment">/* do not update &#x27;GCdebt&#x27; */</span></span><br><span class="line">  &#125;</span><br><span class="line">  lua_assert((nsize == <span class="number">0</span>) == (newblock == <span class="literal">NULL</span>));</span><br><span class="line">  g-&gt;GCdebt = (g-&gt;GCdebt + nsize) - osize;</span><br><span class="line">  <span class="keyword">return</span> newblock;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> luaM_reallocvector(L, v,oldn,n,t) \</span></span><br><span class="line"><span class="meta">   (cast(t *, luaM_realloc_(L, v, cast_sizet(oldn) * sizeof(t), \</span></span><br><span class="line"><span class="meta">                                  cast_sizet(n) * sizeof(t))))</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>g-&gt;frealloc 内存分配器，在创建状态机的时候可以由用户自己指定。</li>
+<li>很多内存管理器依据目前内存大小优化内存分配，故传入目前内存大小参数。</li>
+<li>尝试分配内存，若分配失败则进行GC后再次尝试。</li>
+<li>GCdebt GC相关标记。</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Lua</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/算法//" class="article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
+      
 
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2022/12/26/%E4%B8%80%E3%80%81%E7%AE%80%E8%BF%B0lua%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E5%8F%AF%E5%8F%98%E7%89%B9%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">一.简述lua变量类型可变特性的实现。</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#lua%E5%AD%97%E7%AC%A6%E4%B8%B2TString"><span class="toc-number">2.1.</span> <span class="toc-text">lua字符串TString</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8stringtable"><span class="toc-number">2.2.</span> <span class="toc-text">全局字符串表stringtable</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%AE%97%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">操作算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#luaS-new-%E5%88%9B%E5%BB%BA%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%B9%E5%A4%96%E6%8E%A5%E5%8F%A3"><span class="toc-number">3.1.</span> <span class="toc-text">luaS_new 创建字符串对外接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#luaS-newlstr-%E5%88%9B%E5%BB%BA%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.2.</span> <span class="toc-text">luaS_newlstr 创建字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#internshrstr-%E5%88%9B%E5%BB%BA%E7%9F%AD%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">3.3.</span> <span class="toc-text">internshrstr 创建短字符串</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#createstrobj-%E5%88%9B%E5%BB%BA%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%B9%E8%B1%A1"><span class="toc-number">3.4.</span> <span class="toc-text">createstrobj 创建字符串对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sizelstring-%E5%8A%A8%E6%80%81%E8%AE%A1%E7%AE%97TString%E7%BB%93%E6%9E%84%E4%BD%93%E5%86%85%E5%AD%98"><span class="toc-number">3.5.</span> <span class="toc-text">sizelstring 动态计算TString结构体内存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#growstrtab-%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C%E8%A1%A8%E7%94%9F%E9%95%BF"><span class="toc-number">3.6.</span> <span class="toc-text">growstrtab 字符串哈希表生长</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#luaS-resize-%E9%87%8D%E7%BD%AE%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C%E8%A1%A8%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.7.</span> <span class="toc-text">luaS_resize 重置字符串哈希表的大小</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tablerehash-%E9%87%8D%E6%96%B0%E8%AE%A1%E7%AE%97%E5%93%88%E5%B8%8C"><span class="toc-number">3.8.</span> <span class="toc-text">tablerehash 重新计算哈希</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#luaS-hash-%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95"><span class="toc-number">3.9.</span> <span class="toc-text">luaS_hash 字符串哈希算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#lmod"><span class="toc-number">3.10.</span> <span class="toc-text">lmod</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#luaM-reallocvector-%E9%87%8D%E6%96%B0%E5%88%86%E9%85%8D%E9%A1%BA%E5%BA%8F%E8%A1%A8%E5%86%85%E5%AD%98"><span class="toc-number">3.11.</span> <span class="toc-text">luaM_reallocvector 重新分配顺序表内存</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -215,10 +349,10 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
-		isCategory: true,
+		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
 		root: "/",
@@ -278,6 +412,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">算法</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">Lua</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">UE</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">游戏业务</a>
               </li>
             
             <div class="clearfix"></div>
